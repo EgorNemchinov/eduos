@@ -23,8 +23,17 @@ int sys_write(int syscall,
 	return write(STDOUT_FILENO, msg, strlen(msg));
 }
 
+int sys_read(int syscall, 
+		unsigned long arg1, unsigned long arg2,
+		unsigned long arg3, unsigned long arg4,
+		void *rest) {
+	void *buffer = (void *) arg1;
+	int bytes = (int) arg2;
+	return read(STDIN_FILENO, buffer, bytes);
+}
+
 static const sys_call_t sys_table[] = {
-	sys_write,
+	sys_write, sys_read,
 };
 
 static void os_sighnd(int sig, siginfo_t *info, void *ctx) {
@@ -72,8 +81,14 @@ int os_sys_write(const char *msg) {
 	return os_syscall(0, (unsigned long) msg, 0, 0, 0, NULL);
 }
 
+int os_sys_read(char *buffer, int bytes) {
+	return os_syscall(1, (unsigned long) buffer, bytes, 0, 0, NULL);
+}
+
+
 int main(int argc, char *argv[]) {
 	os_init();
-	app1();
+	// app1();
+	app2();
 	return 0;
 }
