@@ -32,8 +32,25 @@ int sys_read(int syscall,
 	return read(STDIN_FILENO, buffer, bytes);
 }
 
+int sys_malloc(int syscall, 
+		unsigned long arg1, unsigned long arg2,
+		unsigned long arg3, unsigned long arg4,
+		void *rest) {
+	int size = (int) arg1;
+	return (int) malloc(size);
+}
+
+int sys_free(int syscall, 
+		unsigned long arg1, unsigned long arg2,
+		unsigned long arg3, unsigned long arg4,
+		void *rest) {
+	void *ptr = (void *) arg1;
+	free(ptr);
+	return 1;
+}
+
 static const sys_call_t sys_table[] = {
-	sys_write, sys_read,
+	sys_write, sys_read, sys_malloc, sys_free, 
 };
 
 static void os_sighnd(int sig, siginfo_t *info, void *ctx) {
@@ -85,10 +102,28 @@ int os_sys_read(char *buffer, int bytes) {
 	return os_syscall(1, (unsigned long) buffer, bytes, 0, 0, NULL);
 }
 
+int os_sys_malloc(int size) {
+	return os_syscall(2, (unsigned long) size, 0, 0, 0, NULL);
+}
+
+int os_sys_free(void *ptr) {
+	return os_syscall(3, (unsigned long) ptr, 0, 0, 0, NULL);
+}
+
+//May be printLine() and readLine() shouldn't be in the os.c?
+void printLine(const char *string) {
+	os_sys_write(string);
+}
+
+const char* readLine() {
+	int length = 255;
+	char *buffer = (char *) os_sys_malloc(length);
+	os_sys_read(buffer, length);
+	return buffer;
+}
 
 int main(int argc, char *argv[]) {
 	os_init();
-	// app1();
 	app2();
 	return 0;
 }
