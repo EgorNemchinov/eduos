@@ -10,6 +10,8 @@
 #include <ucontext.h>
 #include <sys/ucontext.h>
 
+void run_shell();
+
 typedef int(*sys_call_t)(int syscall,
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
@@ -124,6 +126,6 @@ const char* readLine() {
 
 int main(int argc, char *argv[]) {
 	os_init();
-	app2();
+	run_shell();
 	return 0;
 }
