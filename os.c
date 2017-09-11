@@ -12,12 +12,12 @@
 
 void run_shell();
 
-typedef int(*sys_call_t)(int syscall,
+typedef long(*sys_call_t)(int syscall,
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
 		void *rest);
 
-static int sys_write(int syscall,
+static long sys_write(int syscall,
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
 		void *rest) {
@@ -25,7 +25,7 @@ static int sys_write(int syscall,
 	return write(STDOUT_FILENO, msg, strlen(msg));
 }
 
-int sys_read(int syscall, 
+static long sys_read(int syscall,
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
 		void *rest) {
@@ -34,15 +34,15 @@ int sys_read(int syscall,
 	return read(STDIN_FILENO, buffer, bytes);
 }
 
-int sys_malloc(int syscall, 
+static long sys_malloc(int syscall, 
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
 		void *rest) {
 	int size = (int) arg1;
-	return (int) malloc(size);
+	return (long) malloc(size);
 }
 
-int sys_free(int syscall, 
+static long sys_free(int syscall,
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
 		void *rest) {
@@ -82,11 +82,11 @@ static void os_init(void) {
 	}
 }
 
-static int os_syscall(int syscall,
+static long os_syscall(int syscall,
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
 		void *rest) {
-	int ret;
+	long ret;
 	__asm__ __volatile__(
 		"int $0x81\n"
 		: "=a"(ret)
@@ -96,19 +96,19 @@ static int os_syscall(int syscall,
 	return ret;
 }
 
-int os_sys_write(const char *msg) {
+long os_sys_write(const char *msg) {
 	return os_syscall(0, (unsigned long) msg, 0, 0, 0, NULL);
 }
 
-int os_sys_read(char *buffer, int bytes) {
+long os_sys_read(char *buffer, int bytes) {
 	return os_syscall(1, (unsigned long) buffer, bytes, 0, 0, NULL);
 }
 
-int os_sys_malloc(int size) {
+long os_sys_malloc(int size) {
 	return os_syscall(2, (unsigned long) size, 0, 0, 0, NULL);
 }
 
-int os_sys_free(void *ptr) {
+long os_sys_free(void *ptr) {
 	return os_syscall(3, (unsigned long) ptr, 0, 0, 0, NULL);
 }
 
