@@ -1,25 +1,29 @@
 
 #include "os.h"
-#include "string.h"
+
+int strLength(const char *string) {
+	int count = 0;
+	while(*(string + count)) {
+		count++;
+	}
+	return count;
+}
 
 void app1(int argc, char *argv[]) {
 	const char *prefix = "Hello, ";
 	const char *suffix = "!\n";
-	char *msg;
 	if(argc > 0) {
-		msg = (char *) os_sys_malloc(strlen(prefix) + strlen(argv[0]) + strlen(suffix) + 1);
-		msg[0] = 0;
-		strcat(msg, prefix);
-		strcat(msg, argv[0]);
-		strcat(msg, suffix);
-	} else msg = "Hello, World!\n";
-	printLine(msg);
+		os_sys_write(prefix);
+		os_sys_write(argv[0]);
+		os_sys_write(suffix);
+	} else os_sys_write("Hello, World!\n");
 }
 
 void app2(void) {
 	printLine("Type a string you want to reverse:\n");
 	const char *input = readLine();
-	int length = strlen(input);
+	os_sys_write(input);
+	int length = strLength(input);
 
 	char *reversed = (char *) os_sys_malloc(length + 1);
 	int ptr;
