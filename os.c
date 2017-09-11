@@ -17,7 +17,7 @@ typedef int(*sys_call_t)(int syscall,
 		unsigned long arg3, unsigned long arg4,
 		void *rest);
 
-int sys_write(int syscall,
+static int sys_write(int syscall,
 		unsigned long arg1, unsigned long arg2,
 		unsigned long arg3, unsigned long arg4,
 		void *rest) {
