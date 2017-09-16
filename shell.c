@@ -9,7 +9,6 @@ const char *HELP_STRING = "Possible commands:\n    app1(name='World') - prints '
 											  "    app2() - reads line, reverses it and prints back.\n"
 											  "    quit or q - exits the shell.\n"
 											  "For example, you can use a combination of these: 'app1 brother; app1; app2;'\n";
-const char *UNKNOWN_CMD_STRING = "Unknown command. Type 'help' or 'h' to find out possible commands.\n";									  
 
 
 int execute(int argc, char *argv[]) {
@@ -31,8 +30,10 @@ int execute(int argc, char *argv[]) {
 		app2();
 	} else if(strcmp(appName, "help") == 0 | strcmp(appName, "h") == 0) {
 		os_sys_write(HELP_STRING);
-	} else {
-		os_sys_write(UNKNOWN_CMD_STRING);
+	} else if(strlen(appName) > 0) {
+		os_sys_write("Unknown command: \"");
+		os_sys_write(appName);
+		os_sys_write("\". To find out possible commands, type 'help' or 'h'\n");
 	}
 	return 1;
 }
@@ -87,7 +88,11 @@ int parse_input(const char *string, int argIndex, char *argv[], int ptr) {
 void run_shell() {
 	os_sys_write(BEGIN_STRING);
 
+	char *buffer = (char *) os_sys_malloc(255);
 	char **args = (char **) os_sys_malloc(MAX_ARGS*sizeof(char*));
-	while(parse_input((const char *) readLine(), 0, args, 0)) {}
+	do {
+		os_sys_write("> ");
+		os_sys_read(buffer, 255);
+	} while(parse_input(buffer, 0, args, 0));
 	os_sys_free(args);
 }
