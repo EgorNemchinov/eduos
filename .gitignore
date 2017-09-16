@@ -1,0 +1,6 @@
+**.o
+image
+
+test/t/**.out
+
+.vscode/

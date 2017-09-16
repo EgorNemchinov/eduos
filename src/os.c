@@ -5,12 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <signal.h>
 #include <ucontext.h>
 #include <sys/ucontext.h>
 
-void run_shell();
+#include "os.h"
+#include "apps.h"
+#include "shell.h"
 
 typedef long(*sys_call_t)(int syscall,
 		unsigned long arg1, unsigned long arg2,

@@ -1,5 +1,6 @@
-#include "os.h"
 #include "string.h"
+#include "os.h"
+#include "apps.h"
 
 #define MAX_ARGS 10
 #define MAX_ARG_LENGTH 100
@@ -13,9 +14,9 @@ const char *HELP_STRING = "Possible commands:\n    app1(name='World') - prints '
 
 int execute(int argc, char *argv[]) {
 	char *appName = argv[0];
-	if(strcmp(appName, "quit") == 0 | strcmp(appName, "q") == 0) {
+	if((strcmp(appName, "quit") == 0) | (strcmp(appName, "q") == 0)) {
 		os_sys_write("Okay, bye!");
-		return 0;	
+		return 0;
 	} else if(strcmp(appName, "app1") == 0) {
 		if(argc > 2) {
 			os_sys_write("Too many arguments for app1. Type 'help' or 'h' to learn more about possible commands.\n");
@@ -28,7 +29,7 @@ int execute(int argc, char *argv[]) {
 			return 1;
 		}
 		app2();
-	} else if(strcmp(appName, "help") == 0 | strcmp(appName, "h") == 0) {
+	} else if((strcmp(appName, "help") == 0 ) | ( strcmp(appName, "h") == 0)) {
 		os_sys_write(HELP_STRING);
 	} else if(strlen(appName) > 0) {
 		os_sys_write("Unknown command: \"");
@@ -40,7 +41,7 @@ int execute(int argc, char *argv[]) {
 
 // Recursive function, each time passing into *string unprocessed part of input line
 int parse_input(const char *string, int argIndex, char *argv[], int ptr) {
-	if (argIndex == 0 & ptr == 0) {
+	if((argIndex == 0 ) & ( ptr == 0)) {
 		argv[0] = (char *) os_sys_malloc(MAX_ARG_LENGTH);
 	}
 
@@ -51,7 +52,7 @@ int parse_input(const char *string, int argIndex, char *argv[], int ptr) {
 		case '\n':
 			//Execute and possibly return
 			if(ptr != 0) {
-				argv[argIndex][ptr] = 0;				
+				argv[argIndex][ptr] = 0;
 				argIndex++;
 				ptr = 0;
 			}
@@ -59,11 +60,11 @@ int parse_input(const char *string, int argIndex, char *argv[], int ptr) {
 			res = execute(argc, argv);
 
 			for(argIndex = 0; argIndex < argc; argIndex++) {
-				os_sys_free(argv[argIndex]);	
+				os_sys_free(argv[argIndex]);
 			}
 			argIndex = 0;
 
-			if(res == 0 | string[0] != ';') return res;
+			if((res == 0 ) | ( string[0] != ';')) return res;
 			break;
 		case ' ':
 			//Allocate memory for the next argument

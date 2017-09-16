@@ -1,0 +1,9 @@
+language: c
+sudo: false
+
+env:
+        matrix:
+                - TEST=eduos_shell
+                - TEST=host_shell
+
+script : ./test/run.sh -v $TEST
