@@ -1,6 +1,17 @@
 
 #include "os.h"
 
+void printLine(const char *string) {
+	os_sys_write(string);
+}
+
+const char* readLine() {
+	int length = 255;
+	char *buffer = (char *) os_sys_malloc(length);
+	os_sys_read(buffer, length);
+	return buffer;
+}
+
 int strLength(const char *string) {
 	int count = 0;
 	while(*(string + count)) {
@@ -22,7 +33,6 @@ void app1(int argc, char *argv[]) {
 void app2(void) {
 	printLine("Type a string you want to reverse:\n");
 	const char *input = readLine();
-	os_sys_write(input);
 	int length = strLength(input);
 
 	char *reversed = (char *) os_sys_malloc(length + 1);

@@ -112,18 +112,6 @@ long os_sys_free(void *ptr) {
 	return os_syscall(3, (unsigned long) ptr, 0, 0, 0, NULL);
 }
 
-//May be printLine() and readLine() shouldn't be in the os.c?
-void printLine(const char *string) {
-	os_sys_write(string);
-}
-
-const char* readLine() {
-	int length = 255;
-	char *buffer = (char *) os_sys_malloc(length);
-	os_sys_read(buffer, length);
-	return buffer;
-}
-
 int main(int argc, char *argv[]) {
 	os_init();
 	run_shell();
