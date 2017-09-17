@@ -9,8 +9,8 @@
 #define MAX_ARG_LENGTH 100
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
 
-/*const char *BEGIN_STRING = "Welcome, stranger!\nTo find out possible commands, type 'help' or 'h'\n";
-const char *HELP_STRING = "Possible commands:\n    app1(name='World') - prints 'Hello, $name$!'\n"
+const char *BEGIN_STRING = "Welcome, stranger!\n";
+/*const char *HELP_STRING = "Possible commands:\n    app1(name='World') - prints 'Hello, $name$!'\n"
 											  "    app2() - reads line, reverses it and prints back.\n"
 											  "    quit or q - exits the shell.\n"
 											  "For example, you can use a combination of these: 'app1 brother; app1; app2;'\n";
