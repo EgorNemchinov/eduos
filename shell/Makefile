@@ -1,6 +1,8 @@
 
 all : shell
 
+CFLAGS = -std=c99
+
 clean :
 	rm -f shell 1.out
 

@@ -4,7 +4,7 @@
 #include "os.h"
 #include "apps.h"
 
-// extern char *strtok_r(char *str, const char *delim, char **saveptr);
+extern char *strtok_r(char *str, const char *delim, char **saveptr);
 
 static int echo(int argc, char *argv[]) {
 	for (int i = 1; i < argc; ++i) {
@@ -21,54 +21,9 @@ static const struct {
 	{ "echo", echo },
 };
 
-void printLine(const char *string) {
-	os_sys_write(string);
-}
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
 
-const char* readLine() {
-	int length = 255;
-	char *buffer = (char *) os_sys_malloc(length);
-	os_sys_read(buffer, length);
-	return buffer;
-}
-
-int strLength(const char *string) {
-	int count = 0;
-	while(*(string + count)) {
-		count++;
-	}
-	return count;
-}
-
-void app1(int argc, char *argv[]) {
-	const char *prefix = "Hello, ";
-	const char *suffix = "!\n";
-	if(argc > 0) {
-		os_sys_write(prefix);
-		os_sys_write(argv[0]);
-		os_sys_write(suffix);
-	} else os_sys_write("Hello, World!\n");
-}
-
-void app2(void) {
-	printLine("Type a string you want to reverse:\n");
-	const char *input = readLine();
-	int length = strLength(input);
-
-	char *reversed = (char *) os_sys_malloc(length + 1);
-	int ptr;
-	for(ptr = 0; ptr < length; ptr++) {
-		reversed[ptr] = input[length - ptr - 2];
-	}
-	reversed[length - 1] = '\n';
-
-	printLine(reversed);
-}
-
-
-// #define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
-
-/*static int do_task(char *command) {
+static int do_task(char *command) {
 	char *saveptr;
 	char *arg = strtok_r(command, " ", &saveptr);
 	char *argv[256];
@@ -89,28 +44,45 @@ void app2(void) {
 	strcat(msg, "\n");
 	os_sys_write(msg);
 	return 1;
-}*/
+}
 
-/*void shell() {
-	while (1) {
-		os_sys_write("> ");	
-		char buffer[256];
-		int bytes = os_sys_read(buffer, sizeof(buffer));
-		if (!bytes) {
-			break;
-		}
+static struct shell_env {
+	char buffer[256];
+} g_shell_env;
 
-		if (bytes < sizeof(buffer)) {
-			buffer[bytes] = '\0';
-		}
+static void shell_input(int bytes, void *arg);
 
-		char *saveptr;
-		const char *comsep = "\n;";
-		char *cmd = strtok_r(buffer, comsep, &saveptr);
-		while (cmd) {
-			do_task(cmd);
-			cmd = strtok_r(NULL, comsep, &saveptr);
-		}
+static void shell_prompt(void *arg) {
+	struct shell_env *env = (struct shell_env *) arg;
+	os_sys_write("> ");
+	os_sys_read(env->buffer, sizeof(env->buffer), shell_input, arg);
+	os_sys_write("hui");
+}
+
+static void shell_input(int bytes, void *arg) {
+	struct shell_env *env = (struct shell_env *) arg;
+
+	if (!bytes) {
+		os_sys_write("\n");
+		return;
 	}
-	os_sys_write("\n");
-}*/
+
+	if (bytes < sizeof(env->buffer)) {
+		env->buffer[bytes] = '\0';
+	}
+
+	char *saveptr;
+	const char *comsep = "\n;";
+	char *cmd = strtok_r(env->buffer, comsep, &saveptr);
+	while (cmd) {
+		do_task(cmd);
+		cmd = strtok_r(NULL, comsep, &saveptr);
+	}
+
+	shell_prompt(arg);
+}
+
+
+void shell() {
+	shell_prompt(&g_shell_env);
+}

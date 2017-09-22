@@ -6,7 +6,7 @@ all : image
 CC = gcc
 CFLAGS = -std=c99 -Wall -Werror
 
-image : src/os.o src/apps.o src/shell.o
+image : src/os.o src/apps.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean :
