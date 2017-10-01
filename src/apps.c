@@ -56,7 +56,6 @@ static void shell_prompt(void *arg) {
 	struct shell_env *env = (struct shell_env *) arg;
 	os_sys_write("> ");
 	os_sys_read(env->buffer, sizeof(env->buffer), shell_input, arg);
-	os_sys_write("hui");
 }
 
 static void shell_input(int bytes, void *arg) {
