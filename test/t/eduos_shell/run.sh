@@ -2,6 +2,6 @@
 
 . $TESTDIR/lib.sh
 
-make
+make_eduos
 
 check_out ./image $CDIR/1

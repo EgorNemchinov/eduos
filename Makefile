@@ -5,7 +5,11 @@ all : image
 CC = gcc
 CFLAGS = -std=c99 -I$(PWD) -Wall -Werror
 
-image : src/os.o src/apps.o
+KERNEL = os os/irq os/syscall os/sched os/time
+
+$(KERNEL:%=src/%.o) : CFLAGS += -I$(PWD)/src
+
+image : $(KERNEL:%=src/%.o) src/apps.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean :

@@ -9,4 +9,8 @@ check_out() {
 	diff -q $pat.out $pat.out.gold
 }
 
+make_eduos() {
+	make clean all
+}
+
 cd $TESTDIR/..

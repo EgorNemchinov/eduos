@@ -14,11 +14,21 @@ static int echo(int argc, char *argv[]) {
 	return 0;
 }
 
+static int sleep(int argc, char *argv[]) {
+	return 1;
+}
+
+static int uptime(int argc, char *argv[]) {
+	return 1;
+}
+
 static const struct {
 	const char *name;
 	int(*fn)(int, char *[]);
 } app_list[] = {
 	{ "echo", echo },
+	{ "sleep", sleep },
+	{ "uptime", uptime },
 };
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
