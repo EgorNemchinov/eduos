@@ -14,6 +14,8 @@
 #include <ucontext.h>
 #include <sys/ucontext.h>
 
+#include "third-party/queue.h"
+
 #include "os.h"
 #include "apps.h"
 
@@ -74,35 +76,73 @@ static void unblock_sig(int sig) {
 }
 
 enum sched_state {
+	SCHED_FINISH,
 	SCHED_READY,
 	SCHED_SLEEP,
 	SCHED_RUN,
-	SCHED_FINISH,
 };
 
 struct sched_task {
+	enum sched_state state;
 	syshandler_t hnd;
 	void *arg;
 	int res;
+	TAILQ_ENTRY(sched_task) link;
 };
 
+static struct {
+	struct sched_task tasks[97];
+	TAILQ_HEAD(listhead, sched_task) head;
+} sched_task_queue;
+
+void sched_init(void) {
+	TAILQ_INIT(&sched_task_queue.head);
+}
+
 void sched_add(enum sched_state state, int res, syshandler_t hnd, void *arg) {
-	/* TODO */
+	for (int i = 0; i < 97; ++i) {
+		if (sched_task_queue.tasks[i].state == SCHED_FINISH) {
+			struct sched_task *new_task = &sched_task_queue.tasks[i];
+			new_task->state = state;
+			new_task->res = res;
+			new_task->hnd = hnd;
+			new_task->arg = arg;
+			TAILQ_INSERT_TAIL(&sched_task_queue.head, new_task, link);
+			return;
+		}
+	}
 }
 
 void sched_notify(int res) {
-	/* TODO */
-	/* task = find in list waiting task */
-	/* change it's result */
-	/* change it's state */
+	struct sched_task *task;
+	TAILQ_FOREACH(task, &sched_task_queue.head, link) {
+		if (task->state == SCHED_SLEEP) {
+			task->state = SCHED_READY;
+			task->res = res;
+			return;
+		}
+	}
 }
 
 void sched_loop(void) {
-	/* TODO */
-	/* get one READY task */
-	/* call hnd with it's result and arg */
 	while (1) {
-		pause();
+		if (TAILQ_EMPTY(&sched_task_queue.head)) {
+			return;
+		}
+		int flag = 0;
+		struct sched_task *task;
+		struct sched_task *next_task;
+		TAILQ_FOREACH_SAFE(task, &sched_task_queue.head, link, next_task) {
+			if (task->state == SCHED_READY) {
+				task->state = SCHED_FINISH;
+				TAILQ_REMOVE(&sched_task_queue.head, task, link);
+				task->hnd(task->res, task->arg);
+				flag = 1;
+			}
+		}
+		if (!flag) {
+			pause();
+		}
 	}
 }
 
@@ -229,6 +269,7 @@ int os_sys_read(char *buffer, int size, syshandler_t hnd, void *arg) {
 
 int main(int argc, char *argv[]) {
 	os_init();
+	sched_init();
 	shell();
 	sched_loop();
 	return 0;

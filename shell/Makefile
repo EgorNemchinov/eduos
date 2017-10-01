@@ -1,4 +1,3 @@
-
 all : shell
 
 CFLAGS = -std=c99

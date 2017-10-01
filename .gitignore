@@ -1,7 +1,4 @@
 **.o
 /image
-
-/test/t/**.out
-
 /tags
 .vscode/
