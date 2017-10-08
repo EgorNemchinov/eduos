@@ -4,7 +4,7 @@
 
 #include "third-party/queue.h"
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
+#include <ucontext.h>
 
 enum sched_state {
 	SCHED_FINISH,
@@ -13,20 +13,24 @@ enum sched_state {
 	SCHED_RUN,
 };
 
+typedef void (*sched_task_entry_t)(void *arg);
+
 struct sched_task {
-	enum sched_state state;
-	syshandler_t hnd;
-	void *arg;
-	int res;
 	TAILQ_ENTRY(sched_task) link;
+	ucontext_t ctx;
+	char stack[4096];
+	enum sched_state state;
 };
 
-extern void sched_add(enum sched_state state, int res, syshandler_t hnd, void *arg);
+extern struct sched_task *sched_add(sched_task_entry_t entry, void *arg);
+extern void sched_wait(void);
+extern void sched_notify(struct sched_task *task);
 
-extern void sched_notify(int res);
+extern struct sched_task *sched_current(void);
+
+extern void sched(void);
 
 extern void sched_init(void);
-
 extern void sched_loop(void);
 
 #endif /* EDUOS_OS_SCHED_H */

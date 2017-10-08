@@ -1,4 +1,6 @@
 
+#include <stddef.h>
+
 #include "os.h"
 #include "os/syscall.h"
 #include "os/irq.h"
@@ -16,7 +18,7 @@ int main(int argc, char *argv[]) {
 
 	sched_init();
 
-	shell();
+	sched_add(shell, NULL);
 
 	sched_loop();
 

@@ -45,7 +45,10 @@ static int do_task(char *command) {
 
 	for (int i = 0; i < ARRAY_SIZE(app_list); ++i) {
 		if (!strcmp(argv[0], app_list[i].name)) {
+			/* TODO run as sched task */
 			return app_list[i].fn(argc, argv);
+			/* TODO exit */
+			/* TODO waitpid? */
 		}
 	}
 
@@ -56,42 +59,28 @@ static int do_task(char *command) {
 	return 1;
 }
 
-static struct shell_env {
-	char buffer[256];
-} g_shell_env;
+void shell(void *args) {
+	while (1) {
+		os_sys_write("> ");
+		char buffer[256];
+		int bytes = os_sys_read(buffer, sizeof(buffer));
+		if (!bytes) {
+			break;
+		}
 
-static void shell_input(int bytes, void *arg);
+		if (bytes < sizeof(buffer)) {
+			buffer[bytes] = '\0';
+		}
 
-static void shell_prompt(void *arg) {
-	struct shell_env *env = (struct shell_env *) arg;
-	os_sys_write("> ");
-	os_sys_read(env->buffer, sizeof(env->buffer), shell_input, arg);
-}
-
-static void shell_input(int bytes, void *arg) {
-	struct shell_env *env = (struct shell_env *) arg;
-
-	if (!bytes) {
-		os_sys_write("\n");
-		return;
+		char *saveptr;
+		const char *comsep = "\n;";
+		char *cmd = strtok_r(buffer, comsep, &saveptr);
+		while (cmd) {
+			do_task(cmd);
+			cmd = strtok_r(NULL, comsep, &saveptr);
+		}
 	}
 
-	if (bytes < sizeof(env->buffer)) {
-		env->buffer[bytes] = '\0';
-	}
-
-	char *saveptr;
-	const char *comsep = "\n;";
-	char *cmd = strtok_r(env->buffer, comsep, &saveptr);
-	while (cmd) {
-		do_task(cmd);
-		cmd = strtok_r(NULL, comsep, &saveptr);
-	}
-
-	shell_prompt(arg);
-}
-
-
-void shell() {
-	shell_prompt(&g_shell_env);
+	os_sys_write("\n");
+	os_halt(0);
 }
