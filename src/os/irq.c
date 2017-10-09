@@ -1,6 +1,4 @@
 
-#define _GNU_SOURCE
-
 #include <signal.h>
 #include <errno.h>
 #include <stdio.h>
