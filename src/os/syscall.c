@@ -103,10 +103,16 @@ static long sys_clone(int syscall,
 	unsigned long arg1, unsigned long arg2,
 	unsigned long arg3, unsigned long arg4,
 	void *rest) {
+		irqmask_t mask = irq_disable();
+
 		void (*fn) (void *arg) = (void *) arg1;
 		void *arg = (void *) arg2;
+
 		struct sched_task *task = sched_add(fn, arg);
 		task->parent = sched_current();
+
+		irq_enable(mask);
+
 		return task->id;
 }
 
@@ -119,7 +125,7 @@ static long sys_exit(int syscall,
 
 	struct sched_task *current = sched_current();
 	sched_remove(current);
-	sched_notify(current);
+	sched_notify(current->parent);
 	
 	irq_enable(mask);
 
