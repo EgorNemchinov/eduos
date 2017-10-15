@@ -24,6 +24,7 @@ typedef long(*sys_call_t)(int syscall,
 	x(halt) \
 	x(waitpid) \
 	x(clone) \
+	x(exit)
 
 
 
@@ -105,8 +106,26 @@ static long sys_clone(int syscall,
 		void (*fn) (void *arg) = (void *) arg1;
 		void *arg = (void *) arg2;
 		struct sched_task *task = sched_add(fn, arg);
+		task->parent = sched_current();
 		return task->id;
-	}
+}
+
+static long sys_exit(int syscall,
+	unsigned long arg1, unsigned long arg2,
+	unsigned long arg3, unsigned long arg4,
+	void *rest)
+{
+	irqmask_t mask = irq_disable();
+
+	struct sched_task *current = sched_current();
+	sched_remove(current);
+	sched_notify(current);
+	
+	irq_enable(mask);
+
+	sched();
+	return 0;
+}
 
 #define TABLE_LIST(name) sys_ ## name,
 static const sys_call_t sys_table[] = {
@@ -147,6 +166,10 @@ int os_waitpid(int taskid) {
 
 int os_clone(void (*fn) (void *arg), void *arg) {
 	return os_syscall(os_syscall_nr_clone, (unsigned long) fn, (unsigned long) arg, 0, 0, NULL);
+}
+
+int os_exit() {
+	return os_syscall(os_syscall_nr_exit, 0, 0, 0, 0, NULL);
 }
 
 static void os_sighnd(int sig, siginfo_t *info, void *ctx) {

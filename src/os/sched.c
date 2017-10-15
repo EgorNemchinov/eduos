@@ -38,7 +38,7 @@ static struct sched_task *new_task(void) {
 void task_tramp(sched_task_entry_t entry, void *arg) {
 	irq_enable(IRQ_ALL);
 	entry(arg);
-	abort();
+	os_exit();
 }
 
 static void task_init(struct sched_task *task) {
@@ -63,6 +63,11 @@ struct sched_task *sched_add(sched_task_entry_t entry, void *arg) {
 	TAILQ_INSERT_TAIL(&sched_task_queue.head, task, link);
 
 	return task;
+}
+
+void sched_remove(struct sched_task *task) {
+	task->state = SCHED_FINISH;
+	TAILQ_REMOVE(&sched_task_queue.head, task, link);
 }
 
 void sched_notify(struct sched_task *task) {
