@@ -105,10 +105,6 @@ int irq_init(void) {
 		perror("fcntl SETFL");
 		exit(1);
 	}
-<<<<<<< HEAD
-
-=======
->>>>>>> c9f4369... Add split os files (somehow they got lost previously).
 	return 0;
 }
 

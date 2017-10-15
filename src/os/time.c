@@ -9,11 +9,7 @@
 static void os_sigalrmhnd(int signal, siginfo_t *info, void *ctx) {
 	struct itimerval cur_it;
 	getitimer(ITIMER_REAL, &cur_it);
-<<<<<<< HEAD
-	/*fprintf(stderr, "%s: tv_usec=%ld\n", __func__, cur_it.it_value.tv_usec);*/
-=======
-	fprintf(stderr, "%s: tv_usec=%ld\n", __func__, cur_it.it_value.tv_usec);
->>>>>>> c9f4369... Add split os files (somehow they got lost previously).
+	//fprintf(stderr, "%s: tv_usec=%ld\n", __func__, cur_it.it_value.tv_usec);
 }
 
 
