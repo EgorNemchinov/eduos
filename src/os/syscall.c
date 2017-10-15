@@ -108,7 +108,8 @@ static long sys_clone(int syscall,
 		void (*fn) (void *arg) = (void *) arg1;
 		void *arg = (void *) arg2;
 
-		struct sched_task *task = sched_add(fn, arg);
+		//TODO: may be reduce child priority
+		struct sched_task *task = sched_add(fn, arg, sched_current()->priority);
 		task->parent = sched_current();
 
 		irq_enable(mask);
