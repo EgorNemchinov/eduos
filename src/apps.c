@@ -78,7 +78,10 @@ void shell(void *args) {
 			arg.argc = 1;
 			arg.argv = cmd; 
 			int task_id = os_clone(do_task, &arg);
-			os_waitpid(task_id);
+			int status = os_waitpid(task_id);
+			if(status != 0) {
+				os_halt(status);
+			}
 
 			cmd = strtok_r(NULL, comsep, &saveptr);
 		}

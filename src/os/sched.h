@@ -28,6 +28,7 @@ struct sched_task {
 	struct sched_task *parent;
 	priority_t priority;
 	int id;
+	int exit_status;
 };
 
 extern struct sched_task *get_task_by_id(int id);

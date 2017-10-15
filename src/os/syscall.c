@@ -83,7 +83,7 @@ static long sys_waitpid(int syscall,
 	unsigned long arg3, unsigned long arg4,
 	void *rest) {
 	
-	irqmask_t cur = irq_disable();
+	irqmask_t mask = irq_disable();
 
 	int task_id = arg1;
 	struct sched_task *task = get_task_by_id(task_id);
@@ -93,10 +93,9 @@ static long sys_waitpid(int syscall,
 		sched();
 	}
 
-	irq_enable(cur);
+	irq_enable(mask);
 
-	// doesn't matter what does it return?
-	return 0;
+	return task->exit_status;
 }
 
 static long sys_clone(int syscall,
@@ -124,7 +123,9 @@ static long sys_exit(int syscall,
 {
 	irqmask_t mask = irq_disable();
 
+	int status = (int) arg1;
 	struct sched_task *current = sched_current();
+	current->exit_status = status;
 	sched_remove(current);
 	sched_notify(current->parent);
 	
@@ -175,8 +176,8 @@ int os_clone(void (*fn) (void *arg), void *arg) {
 	return os_syscall(os_syscall_nr_clone, (unsigned long) fn, (unsigned long) arg, 0, 0, NULL);
 }
 
-int os_exit() {
-	return os_syscall(os_syscall_nr_exit, 0, 0, 0, 0, NULL);
+int os_exit(int status) {
+	return os_syscall(os_syscall_nr_exit, status, 0, 0, 0, NULL);
 }
 
 static void os_sighnd(int sig, siginfo_t *info, void *ctx) {

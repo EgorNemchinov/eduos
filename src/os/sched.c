@@ -37,7 +37,7 @@ static struct sched_task *new_task(void) {
 void task_tramp(sched_task_entry_t entry, void *arg) {
 	irq_enable(IRQ_ALL);
 	entry(arg);
-	os_exit();
+	os_exit(0);
 }
 
 static void task_init(struct sched_task *task) {
