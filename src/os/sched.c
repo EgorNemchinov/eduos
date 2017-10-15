@@ -1,10 +1,10 @@
-
 #include <unistd.h>
 #include <stdlib.h>
 <<<<<<< HEAD
 #include <string.h>
 
 #include "util.h"
+#include "assert.h"
 
 #include "os.h"
 #include "os/sched.h"
@@ -17,12 +17,21 @@ static struct {
 	struct sched_task *idle;
 } sched_task_queue;
 
+struct sched_task *get_task_by_id(int id) {
+	return &sched_task_queue.tasks[id];
+}
+
 static struct sched_task *new_task(void) {
+	irqmask_t irq = irq_disable();	
 	for (int i = 0; i < ARRAY_SIZE(sched_task_queue.tasks); ++i) {
 		if (sched_task_queue.tasks[i].state == SCHED_FINISH) {
+			sched_task_queue.tasks[i].state = SCHED_READY;
+			sched_task_queue.tasks[i].id = i;
+			irq_enable(irq);
 			return &sched_task_queue.tasks[i];
 		}
 	}
+	irq_enable(irq);	
 	return NULL;
 }
 
@@ -43,10 +52,7 @@ static void task_init(struct sched_task *task) {
 }
 
 struct sched_task *sched_add(sched_task_entry_t entry, void *arg) {
-	irqmask_t irq = irq_disable();
 	struct sched_task *task = new_task();
-	task->state = SCHED_READY;
-	irq_enable(irq);
 
 	if (!task) {
 		abort();
@@ -61,10 +67,14 @@ struct sched_task *sched_add(sched_task_entry_t entry, void *arg) {
 
 void sched_notify(struct sched_task *task) {
 	task->state = SCHED_READY;
+	//TODO: inserty by priority
+	TAILQ_INSERT_TAIL(&sched_task_queue.head, task, link);
 }
 
 void sched_wait(void) {
+	//TODO: check if irq disabled
 	sched_current()->state = SCHED_SLEEP;
+	TAILQ_REMOVE(&sched_task_queue.head, sched_current(), link);
 }
 
 struct sched_task *sched_current(void) {
@@ -74,9 +84,9 @@ struct sched_task *sched_current(void) {
 static struct sched_task *next_task(void) {
 	struct sched_task *task;
 	TAILQ_FOREACH(task, &sched_task_queue.head, link) {
-		/* TODO only READY tasks in queue */
+		assert(task->state == SCHED_READY);
 		/* TODO priority */
-		if (task != sched_task_queue.idle && task->state == SCHED_READY) {
+		if (task != sched_task_queue.idle) {
 			return task;
 		}
 	}
