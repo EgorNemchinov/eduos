@@ -22,6 +22,8 @@ typedef long(*sys_call_t)(int syscall,
 	x(write) \
 	x(read) \
 	x(halt) \
+	x(waitpid) \
+	x(clone) \
 
 
 
@@ -75,6 +77,37 @@ static long sys_halt(int syscall,
 	exit(arg1);
 }
 
+static long sys_waitpid(int syscall,
+	unsigned long arg1, unsigned long arg2,
+	unsigned long arg3, unsigned long arg4,
+	void *rest) {
+	
+	irqmask_t cur = irq_disable();
+
+	int task_id = arg1;
+	struct sched_task *task = get_task_by_id(task_id);
+
+	while(task->state != SCHED_FINISH) {
+		sched_wait();
+		sched();
+	}
+
+	irq_enable(cur);
+
+	// doesn't matter what does it return?
+	return 0;
+}
+
+static long sys_clone(int syscall,
+	unsigned long arg1, unsigned long arg2,
+	unsigned long arg3, unsigned long arg4,
+	void *rest) {
+		void (*fn) (void *arg) = (void *) arg1;
+		void *arg = (void *) arg2;
+		struct sched_task *task = sched_add(fn, arg);
+		return task->id;
+	}
+
 #define TABLE_LIST(name) sys_ ## name,
 static const sys_call_t sys_table[] = {
 	SYSCALL_X(TABLE_LIST)
@@ -106,6 +139,14 @@ int os_sys_read(char *buffer, int size) {
 
 int os_halt(int status) {
 	return os_syscall(os_syscall_nr_halt, status, 0, 0, 0, NULL);
+}
+
+int os_waitpid(int taskid) {
+	return os_syscall(os_syscall_nr_waitpid, taskid, 0, 0, 0, NULL);
+}
+
+int os_clone(void (*fn) (void *arg), void *arg) {
+	return os_syscall(os_syscall_nr_clone, (unsigned long) fn, (unsigned long) arg, 0, 0, NULL);
 }
 
 static void os_sighnd(int sig, siginfo_t *info, void *ctx) {
