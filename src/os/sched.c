@@ -66,7 +66,7 @@ struct sched_task *sched_add(sched_task_entry_t entry, void *arg, priority_t pri
 }
 
 void sched_remove_from_queue(struct sched_task *task) {
-	task->state = SCHED_EMPTY;
+	task->state = SCHED_FINISH;
 	TAILQ_REMOVE(&sched_task_queue.head, task, link);
 }
 
