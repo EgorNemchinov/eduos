@@ -107,7 +107,6 @@ static long sys_clone(int syscall,
 		void (*fn) (void *arg) = (void *) arg1;
 		void *arg = (void *) arg2;
 
-		//TODO: may be reduce child priority
 		struct sched_task *task = sched_add(fn, arg, sched_current()->priority);
 		task->parent = sched_current();
 
@@ -126,7 +125,7 @@ static long sys_exit(int syscall,
 	int status = (int) arg1;
 	struct sched_task *current = sched_current();
 	current->exit_status = status;
-	sched_remove(current);
+	sched_remove_from_queue(current);
 	sched_notify(current->parent);
 	
 	irq_enable(mask);

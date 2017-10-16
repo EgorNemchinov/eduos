@@ -23,7 +23,7 @@ struct sched_task *get_task_by_id(int id) {
 static struct sched_task *new_task(void) {
 	irqmask_t irq = irq_disable();	
 	for (int i = 0; i < ARRAY_SIZE(sched_task_queue.tasks); ++i) {
-		if (sched_task_queue.tasks[i].state == SCHED_FINISH) {
+		if (sched_task_queue.tasks[i].state == SCHED_EMPTY) {
 			sched_task_queue.tasks[i].state = SCHED_READY;
 			sched_task_queue.tasks[i].id = i;
 			irq_enable(irq);
@@ -65,8 +65,8 @@ struct sched_task *sched_add(sched_task_entry_t entry, void *arg, priority_t pri
 	return task;
 }
 
-void sched_remove(struct sched_task *task) {
-	task->state = SCHED_FINISH;
+void sched_remove_from_queue(struct sched_task *task) {
+	task->state = SCHED_EMPTY;
 	TAILQ_REMOVE(&sched_task_queue.head, task, link);
 }
 
