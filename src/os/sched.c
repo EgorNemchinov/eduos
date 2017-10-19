@@ -89,10 +89,6 @@ struct sched_task *sched_current(void) {
 static struct sched_task *next_task(void) {
 	struct sched_task *task, *best_task = sched_task_queue.idle;
 	TAILQ_FOREACH(task, &sched_task_queue.head, link) {
-		assert(task->state == SCHED_READY);
-		if(task->state == SCHED_FINISH) {
-			return best_task;
-		}
 		if(task->priority > best_task->priority) {
 			best_task = task;
 		}
