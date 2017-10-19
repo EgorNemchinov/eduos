@@ -92,7 +92,8 @@ static long sys_waitpid(int syscall,
 		sched_wait();
 		sched();
 	}
-
+	task->state = SCHED_EMPTY;
+	
 	irq_enable(mask);
 
 	return task->exit_status;
