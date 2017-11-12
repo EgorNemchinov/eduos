@@ -4,4 +4,4 @@
 
 make -C shell
 
-check_out shell/shell $CDIR/1
+check_out $CDIR/1 shell/shell

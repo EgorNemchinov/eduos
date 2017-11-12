@@ -6,5 +6,7 @@ env:
                 - TEST=eduos_shell
                 - TEST=host_shell
                 - TEST=time
+                - TEST=mutex
+                - TEST=cat
 
 script : ./test/run.sh -v $TEST

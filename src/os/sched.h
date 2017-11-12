@@ -24,21 +24,23 @@ typedef void (*sched_task_entry_t)(void *arg);
 struct sched_task {
 	TAILQ_ENTRY(sched_task) link;
 	ucontext_t ctx;
-	char stack[4096];
+	char stack[0x10000];
 	enum sched_state state;
 	struct sched_task *parent;
 	priority_t priority;
-	int id;
 	int exit_status;
 };
 
-extern struct sched_task *get_task_by_id(int id);
+extern int get_task_id(struct sched_task *task);
+extern struct sched_task *get_task(int task_id);
+extern void remove_task(struct sched_task *task);
+
 extern struct sched_task *sched_add(sched_task_entry_t entry, void *arg, priority_t priority);
-extern void sched_remove_from_queue(struct sched_task *task);
 extern void sched_wait(void);
 extern void sched_notify(struct sched_task *task);
 
 extern struct sched_task *sched_current(void);
+extern int sched_user_id(struct sched_task *task);
 
 extern void sched(void);
 

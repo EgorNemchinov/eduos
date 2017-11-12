@@ -10,7 +10,7 @@ endif
 CC = gcc
 CFLAGS += -std=c99 -I$(PWD) -Wall -Werror
 
-KERNEL = os os/irq os/syscall os/sched os/asm_sched os/time
+KERNEL = os os/irq os/syscall os/sched os/asm_sched os/time os/sem
 
 $(KERNEL:%=src/%.o) : CFLAGS += -I$(PWD)/src -D_GNU_SOURCE
 

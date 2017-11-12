@@ -2,10 +2,10 @@
 CDIR=$(dirname $0)
 
 check_out() {
-	local bin=$1
-	local pat=$2
+	local pat=$1
+	shift 1
 
-	$bin <$pat.in >$pat.out
+	"$@" <$pat.in >$pat.out
 	diff -q $pat.out $pat.out.gold
 }
 

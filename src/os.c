@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 
 	sched_init();
 
-	sched_add(shell, NULL, MAX_PRIORITY);
+	sched_add(shell, NULL, MID_PRIORITY);
 
 	sched_loop();
 
