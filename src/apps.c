@@ -7,6 +7,9 @@
 #include "os.h"
 
 #include "apps.h"
+#include <inttypes.h>
+
+#include "util.h"
 
 extern char *strtok_r(char *str, const char *delim, char **saveptr);
 
@@ -18,18 +21,18 @@ static int echo(int argc, char *argv[]) {
 	return 0;
 }
 
-/* FIXME delete this include */
-#include <stdlib.h>
 static int sleep(int argc, char *argv[]) {
-	/* FIXME implement sleep via eduos scheduler */
-	/* FIXME get time to sleep from arguments */
-	system("sleep 2");
+	int num = (int) strtoumax(argv[1], NULL, 10);
+	os_sleep(num);
 	return 0;
 }
 
 static int uptime(int argc, char *argv[]) {
-	/* FIXME print time passed from eduos kernel start, implement solely via eduos calls */
-	system("date +%s.%N");
+	char time_string[20];
+	double uptime = (double) os_uptime() / 1000000;
+	snprintf(time_string, ARRAY_SIZE(time_string), "%f", uptime);
+	strcat(time_string, "\n");
+	os_sys_write(time_string);
 	return 0;
 }
 
@@ -98,8 +101,6 @@ static const struct {
 struct params {
 	char *cmd;
 };
-
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
 
 static void do_task(void *args) {
 	char *saveptr;

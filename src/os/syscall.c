@@ -13,6 +13,8 @@
 #include "os/irq.h"
 #include "os/sem.h"
 #include "os/syscall.h"
+#include "os/time.h"
+#include "util.h"
 
 typedef long(*sys_call_t)(int syscall,
 		unsigned long arg1, unsigned long arg2,
@@ -31,6 +33,9 @@ typedef long(*sys_call_t)(int syscall,
 	x(sem_init) \
 	x(sem_use) \
 	x(sem_free) \
+	x(sleep) \
+	x(uptime)
+
 
 
 #define ENUM_LIST(name) os_syscall_nr_ ## name,
@@ -185,6 +190,37 @@ static long sys_sem_free(int syscall,
 	return sem_free(arg1);
 }
 
+static long sys_sleep(int syscall,
+	unsigned long arg1, unsigned long arg2,
+	unsigned long arg3, unsigned long arg4,
+	void *rest) {
+	int seconds = (int) arg1;
+
+	irqmask_t irq = irq_disable();
+
+	struct timer tmr;
+
+	new_timer(seconds, sched_current(), &tmr);
+	while(tmr.usec_left > 0) {
+		sched_wait();
+		sched();
+	}
+
+	irq_enable(irq);
+
+	return 0;
+}
+
+static long sys_uptime(int syscall,
+	unsigned long arg1, unsigned long arg2,
+	unsigned long arg3, unsigned long arg4,
+	void *rest) {
+	long t = get_uptime();
+
+	return t;
+}
+
+
 #define TABLE_LIST(name) sys_ ## name,
 static const sys_call_t sys_table[] = {
 	SYSCALL_X(TABLE_LIST)
@@ -249,6 +285,14 @@ int os_sem_use(int semid, int add) {
 
 int os_sem_free(int semid) {
 	return os_syscall(os_syscall_nr_sem_free, semid, 0, 0, 0, NULL);
+}
+
+int os_sleep(int sec) {
+	return os_syscall(os_syscall_nr_sleep, (unsigned long) sec, 0, 0, 0, NULL);
+}
+
+int os_uptime(void) {
+	return os_syscall(os_syscall_nr_uptime, 0, 0, 0, 0, NULL);
 }
 
 static void os_sighnd(int sig, siginfo_t *info, void *ctx) {
