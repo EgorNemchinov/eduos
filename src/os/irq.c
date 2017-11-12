@@ -105,7 +105,6 @@ int irq_init(void) {
 		perror("fcntl SETFL");
 		exit(1);
 	}
-
 	return 0;
 }
 

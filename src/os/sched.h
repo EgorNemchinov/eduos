@@ -6,7 +6,13 @@
 
 #include <ucontext.h>
 
+#define priority_t unsigned char
+#define MAX_PRIORITY 255
+#define MID_PRIORITY 127
+#define MIN_PRIORITY 1
+
 enum sched_state {
+	SCHED_EMPTY,
 	SCHED_FINISH,
 	SCHED_READY,
 	SCHED_SLEEP,
@@ -20,9 +26,15 @@ struct sched_task {
 	ucontext_t ctx;
 	char stack[4096];
 	enum sched_state state;
+	struct sched_task *parent;
+	priority_t priority;
+	int id;
+	int exit_status;
 };
 
-extern struct sched_task *sched_add(sched_task_entry_t entry, void *arg);
+extern struct sched_task *get_task_by_id(int id);
+extern struct sched_task *sched_add(sched_task_entry_t entry, void *arg, priority_t priority);
+extern void sched_remove_from_queue(struct sched_task *task);
 extern void sched_wait(void);
 extern void sched_notify(struct sched_task *task);
 
